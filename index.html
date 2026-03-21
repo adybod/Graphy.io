@@ -16,14 +16,14 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #e4e4eb;
-      --panel: #171730;
-      --panel2: #2a2a52;
-      --border: #838392;
-      --border2: #a3a3ba;
-      --text: #868aa1;
-      --text-dim: #aaaaca;
-      --text-mid: #c3c3d7;
+      --bg: #dce8eb;
+      --panel: #0e1c21;
+      --panel2: #172830;
+      --border: #254a56;
+      --border2: #336070;
+      --text: #5a8898;
+      --text-dim: #3d6474;
+      --text-mid: #8abfcc;
       --accent: #4fffb0;
     }
 
@@ -47,7 +47,9 @@
     }
     .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 19px; letter-spacing: -0.5px; color: var(--text-mid); }
     .logo em { color: #4fffb0; font-style: normal; }
-    .header-hint { margin-left: auto; font-size: 10px; color: var(--text-dim); letter-spacing: 0.5px; }
+    .header-hint { font-size: 10px; color: var(--text-dim); letter-spacing: 0.5px; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .header-logo-img { height: 32px; width: auto; object-fit: contain; display: block; }
 
     .main { display: flex; flex: 1; overflow: hidden; }
 
@@ -157,7 +159,7 @@
     #graph-canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
     #graph-canvas.dragging { cursor: grabbing; }
     .coords-pill { position: absolute; bottom: 12px; right: 14px; background: rgba(11,11,20,0.85); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; font-size: 10px; color: var(--text-mid); backdrop-filter: blur(10px); pointer-events: none; letter-spacing: 0.5px; }
-    #graph-3d { position: absolute; inset: 0; display: none; background: #2a2a52; }
+    #graph-3d { position: absolute; inset: 0; display: none; background: #172830; }
     #graph-3d canvas { display: block; }
     .mode-badge { position: absolute; top: 12px; left: 12px; background: rgba(11,11,20,0.85); border: 1px solid var(--accent); border-radius: 20px; padding: 4px 12px; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); pointer-events: none; }
     .graph-3d-hint { position: absolute; bottom: 12px; left: 12px; font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px; pointer-events: none; }
@@ -186,7 +188,11 @@
 
 <header>
   <div class="logo">Graphy.<em>io</em></div>
-  <span class="header-hint">scroll to zoom · drag to pan · type / to make a fraction · ^ for powers</span>
+  <div class="header-right">
+    <span class="header-hint">AARISE Industries</span>
+    <!-- Replace YOUR_LOGO_URL with your image path or URL -->
+    <img src="./data/logo.svg" alt="logo" class="header-logo-img">
+  </div>
 </header>
 
 <div class="main">
@@ -280,7 +286,7 @@ function drawAll() {
 
   const Wc=W(), Hc=H();
   ctx.clearRect(0,0,Wc,Hc);
-  ctx.fillStyle='#2a2a52'; ctx.fillRect(0,0,Wc,Hc);
+  ctx.fillStyle='#172830'; ctx.fillRect(0,0,Wc,Hc);
 
   const step=niceStep(Math.max(view.xMax-view.xMin, view.yMax-view.yMin));
   ctx.lineWidth=1;
@@ -539,7 +545,7 @@ function drawAnalysis(fn) {
     ctx.beginPath(); ctx.arc(cx,cy,5*DPR,0,Math.PI*2);
     ctx.fillStyle=col; ctx.fill();
     ctx.beginPath(); ctx.arc(cx,cy,2.5*DPR,0,Math.PI*2);
-    ctx.fillStyle='#1a1a38'; ctx.fill();
+    ctx.fillStyle='#0e1c21'; ctx.fill();
     ctx.font=FONT; ctx.fillStyle=col;
     ctx.textAlign='center'; ctx.textBaseline='top';
     ctx.fillText(`(${parseFloat(xi.toPrecision(5))}, 0)`, cx, cy+8*DPR);
@@ -552,7 +558,7 @@ function drawAnalysis(fn) {
       ctx.beginPath(); ctx.arc(cx,cy,5*DPR,0,Math.PI*2);
       ctx.fillStyle=col; ctx.fill();
       ctx.beginPath(); ctx.arc(cx,cy,2.5*DPR,0,Math.PI*2);
-      ctx.fillStyle='#1a1a38'; ctx.fill();
+      ctx.fillStyle='#0e1c21'; ctx.fill();
       ctx.font=FONT; ctx.fillStyle=col;
       ctx.textAlign='left'; ctx.textBaseline='middle';
       ctx.fillText(`(0, ${parseFloat(yIntercept.toPrecision(5))})`, cx+8*DPR, cy);
@@ -576,7 +582,7 @@ function init3D(){
   renderer3d=new THREE.WebGLRenderer({antialias:true});
   renderer3d.setPixelRatio(DPR);
   renderer3d.setSize(w,h);
-  renderer3d.setClearColor(0x2a2a52);
+  renderer3d.setClearColor(0x172830);
   wrap.appendChild(renderer3d.domElement);
 
   scene3d=new THREE.Scene();
@@ -592,7 +598,7 @@ function init3D(){
   scene3d.add(new THREE.AxesHelper(12));
 
   // Grid on xz plane
-  const grid=new THREE.GridHelper(20,20,0x444466,0x2e2e50);
+  const grid=new THREE.GridHelper(20,20,0x254a56,0x172830);
   scene3d.add(grid);
 
   // Mouse orbit
@@ -816,6 +822,50 @@ function numericalSolve(lhsExpr, rhsExpr, varName) {
 // ════════════════════════════════════════
 // FUNCTION MANAGEMENT
 // ════════════════════════════════════════
+function formatAnswer(n) {
+  if(!isFinite(n) || isNaN(n)) return String(n);
+  // If integer, show as integer
+  if(Number.isInteger(n)) return String(n);
+  // Try simple fraction p/q for |p|,q <= 999
+  for(let q=2; q<=999; q++){
+    const p = Math.round(n*q);
+    if(Math.abs(p/q - n) < 1e-9 && Math.abs(p) <= 999){
+      return `${p}/${q}`;
+    }
+  }
+  // Check for common irrational multiples: π, √2, √3 etc.
+  const specials = [
+    [Math.PI,      'π'],
+    [Math.E,       'e'],
+    [Math.SQRT2,   '√2'],
+    [Math.sqrt(3), '√3'],
+    [Math.sqrt(5), '√5'],
+  ];
+  for(const [base, sym] of specials){
+    const ratio = n / base;
+    if(Number.isInteger(Math.round(ratio*1000)/1000)){
+      const r = Math.round(ratio*1000)/1000;
+      if(Math.abs(r - Math.round(r)) < 1e-6){
+        const ri = Math.round(r);
+        if(ri === 1) return sym;
+        if(ri === -1) return '-' + sym;
+        if(ri !== 0) return ri + sym;
+      }
+    }
+    // p/q * base
+    for(let q=2;q<=12;q++){
+      const p=Math.round(ratio*q);
+      if(Math.abs(p/(q*1) - ratio) < 1e-7 && Math.abs(p)<=12){
+        if(p===0) continue;
+        const s = p===1?sym : p===-1?'-'+sym : p+sym;
+        return q===1 ? s : `${s}/${q}`;
+      }
+    }
+  }
+  // Fall back to up to 10 significant figures, trimmed
+  return parseFloat(n.toPrecision(10)).toString();
+}
+
 function parseFn(fn) {
   let expr = fn.expr.trim();
   fn.type = 'function';
@@ -847,6 +897,28 @@ function parseFn(fn) {
       const {roots, error} = numericalSolve(lhs, rhs, varName);
       if(error && roots.length===0) fn.error = error;
       fn.solveResult = roots;
+    }
+    return;
+  }
+
+  // ── Detect Solve(expression) ──
+  const solveMatch = expr.match(/^Solve\((.+)\)$/);
+  if(solveMatch){
+    fn.type = 'solve';
+    const inner = solveMatch[1].trim();
+    try {
+      const raw = math.evaluate(inner);
+      // Format result: fractions stay as fractions, otherwise round nicely
+      if(typeof raw === 'number'){
+        // Try to express as a clean fraction if close to one
+        fn.solveAnswer = formatAnswer(raw);
+      } else {
+        fn.solveAnswer = String(raw);
+      }
+      fn.error = null;
+    } catch(e) {
+      fn.solveAnswer = null;
+      fn.error = 'Cannot evaluate';
     }
     return;
   }
@@ -950,7 +1022,16 @@ function analysisChipsHtml(fn) {
 function updateResultUI(fn) {
   const resEl = document.getElementById(`fr-${fn.id}`);
   if(!resEl) return;
-  if(fn.type==='nsolve' && fn.solveResult !== null){
+
+  if(fn.type==='solve'){
+    if(fn.solveAnswer !== null && fn.solveAnswer !== undefined){
+      resEl.innerHTML = `<span class="fn-result-label">= &nbsp;</span><span class="fn-result-val">${fn.solveAnswer}</span>`;
+    } else {
+      resEl.innerHTML = '';
+    }
+    resEl.parentElement.style.display = fn.solveAnswer != null ? '' : 'none';
+
+  } else if(fn.type==='nsolve' && fn.solveResult !== null){
     if(fn.solveResult.length===0){
       resEl.innerHTML = `<span class="fn-result-label">result</span><span style="color:var(--text-dim);font-size:11px">No solution found</span>`;
     } else {
@@ -961,6 +1042,7 @@ function updateResultUI(fn) {
       resEl.innerHTML = `<span class="fn-result-label">result&nbsp;</span>${vals}`;
     }
     resEl.parentElement.style.display='';
+
   } else {
     resEl.parentElement.style.display='none';
   }
@@ -986,9 +1068,11 @@ function renderSidebar() {
       ? `<span class="fn-label-text" style="font-size:13px;font-weight:700;color:${fn.color}">${letter}</span><span class="fn-label-text" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;flex:0"> · Point</span>`
       : fn.type==='nsolve'
         ? `<span class="fn-label-text" style="font-size:13px;font-weight:700;color:${fn.color}">${letter}</span><span class="fn-label-text" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;flex:0"> · nSolve</span>`
-        : fn.is3D
-          ? `<span class="fn-label-text" style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:${fn.color}">${fnName}(x,y) =</span>`
-          : `<span class="fn-label-text" style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:${fn.color}">${fnName}(x) =</span>`;
+        : fn.type==='solve'
+          ? `<span class="fn-label-text" style="font-size:13px;font-weight:700;color:${fn.color}">${letter}</span><span class="fn-label-text" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;flex:0"> · Solve</span>`
+          : fn.is3D
+            ? `<span class="fn-label-text" style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:${fn.color}">${fnName}(x,y) =</span>`
+            : `<span class="fn-label-text" style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:${fn.color}">${fnName}(x) =</span>`;
 
     const analyzeBtn = fn.type==='function'
       ? `<button class="fn-analyze-btn ${fn.showAnalysis?'active':''}" onclick="toggleAnalysis(${fn.id})" title="Show analysis">⊕</button>`
@@ -1071,6 +1155,7 @@ const KB_GROUPS = [
     label:"Solve & Plot",
     rows:[
       [
+        {d:"Solve",  plain:true, write:"Solve("},
         {d:"nSolve", plain:true, write:"nSolve("},
         {d:"=",      plain:true, write:"="},
         {d:",x",     plain:true, write:",x)"},
@@ -1206,6 +1291,7 @@ document.getElementById('add-fn-btn').addEventListener('click', addFunction);
 document.getElementById('reset-btn').addEventListener('click',()=>{ view={xMin:-10,xMax:10,yMin:-7,yMax:7}; drawAll(); });
 
 renderKeyboard();
+
 addFunction();
 </script>
 </body>
