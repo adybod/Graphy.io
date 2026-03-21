@@ -6,8 +6,12 @@
   <title>Graphy — The Graphing Software.</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -34,276 +38,158 @@
       font-size: 13px;
     }
 
-    /* ── Header ── */
     header {
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      height: 50px;
+      display: flex; align-items: center;
+      padding: 0 20px; height: 50px;
       background: var(--panel);
       border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-      gap: 12px;
-      user-select: none;
+      flex-shrink: 0; gap: 12px; user-select: none;
     }
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 19px;
-      letter-spacing: -0.5px;
-      color: var(--text);
-    }
+    .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 19px; letter-spacing: -0.5px; color: var(--text-mid); }
     .logo em { color: #4fffb0; font-style: normal; }
-    .logo-sub {
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-top: 1px;
-    }
-    .header-hint {
-      margin-left: auto;
-      font-size: 10px;
-      color: var(--text-dim);
-      letter-spacing: 0.5px;
-    }
+    .header-hint { margin-left: auto; font-size: 10px; color: var(--text-dim); letter-spacing: 0.5px; }
 
-    /* ── Layout ── */
     .main { display: flex; flex: 1; overflow: hidden; }
 
-    /* ── Sidebar ── */
     .sidebar {
-      width: 290px;
-      background: var(--panel);
+      width: 290px; background: var(--panel);
       border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      overflow: hidden;
+      display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
     }
-    .sidebar-title {
-      padding: 12px 16px;
-      font-size: 9px;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      border-bottom: 1px solid var(--border);
-    }
+    .sidebar-title { padding: 12px 16px; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); }
     .functions-list { flex: 1; overflow-y: auto; padding: 8px; }
 
-    /* ── Function item ── */
-    .fn-item {
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      margin-bottom: 8px;
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
+    .fn-item { border: 1px solid var(--border); border-radius: 9px; margin-bottom: 8px; overflow: hidden; transition: border-color 0.2s; }
     .fn-item.focused { border-color: var(--fn-color, #4fffb0); }
 
-    .fn-header {
-      display: flex;
-      align-items: center;
-      padding: 7px 10px;
-      gap: 7px;
-      background: var(--panel2);
-      border-bottom: 1px solid var(--border);
-    }
-    .fn-swatch {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--fn-color, #4fffb0);
-      flex-shrink: 0;
-      box-shadow: 0 0 6px var(--fn-color, #4fffb0);
-    }
-    .fn-label-text {
-      font-size: 11px;
-      color: var(--text-mid);
-      flex: 1;
-    }
-    .fn-vis-btn, .fn-del-btn {
-      background: none; border: none;
-      cursor: pointer; font-size: 13px;
-      padding: 2px 5px; border-radius: 4px;
-      transition: all 0.15s; line-height: 1;
-    }
+    .fn-header { display: flex; align-items: center; padding: 7px 10px; gap: 7px; background: var(--panel2); border-bottom: 1px solid var(--border); }
+    .fn-swatch { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .fn-label-text { font-size: 11px; color: var(--text-mid); flex: 1; }
+    .fn-vis-btn, .fn-del-btn { background: none; border: none; cursor: pointer; font-size: 13px; padding: 2px 5px; border-radius: 4px; transition: all 0.15s; line-height: 1; }
     .fn-vis-btn { color: var(--fn-color, #4fffb0); }
     .fn-vis-btn.hidden { color: var(--text-dim); }
     .fn-del-btn { color: var(--text-dim); }
     .fn-del-btn:hover { color: #ff6b6b; background: rgba(255,107,107,0.12); }
+    .fn-analyze-btn { background: none; border: none; cursor: pointer; font-size: 12px; padding: 2px 5px; border-radius: 4px; transition: all 0.15s; line-height: 1; color: var(--text-dim); }
+    .fn-analyze-btn:hover { color: var(--fn-color, #4fffb0); }
+    .fn-analyze-btn.active { color: var(--fn-color, #4fffb0); }
 
-    .fn-input-row { padding: 8px 10px 6px; }
-    .fn-input {
+    /* Analysis info strip */
+    .fn-analysis {
+      border-top: 1px solid var(--border);
+      padding: 8px 13px 10px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .fn-analysis-chip {
+      display: flex; align-items: baseline; gap: 8px;
+    }
+    .fn-analysis-chip .chip-label { color: var(--text-dim); text-transform: uppercase; font-size: 8px; letter-spacing: 1.5px; min-width: 70px; flex-shrink: 0; }
+    .fn-analysis-chip .chip-val { color: var(--text-mid); font-size: 11px; }
+
+    /* ─── MathQuill field ─── */
+    .fn-mq-row {
+      padding: 10px 13px 10px;
+      min-height: 50px;
+      display: flex; align-items: center;
+      cursor: text;
+    }
+    /* Remove ALL default MathQuill chrome */
+    .fn-mq-row .mq-editable-field,
+    .fn-mq-row .mq-editable-field.mq-focused {
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      outline: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
       width: 100%;
-      background: transparent; border: none;
-      color: var(--text);
-      font-family: 'Space Mono', monospace;
-      font-size: 13px;
-      outline: none;
+      font-size: 19px;
+      line-height: 1.7;
     }
-    .fn-input::placeholder { color: var(--text-dim); }
+    /* Text colour cascade */
+    .fn-mq-row .mq-editable-field { color: var(--text-mid); }
+    .fn-mq-row .mq-editable-field * { color: var(--text-mid); }
+    /* Fraction bar */
+    .fn-mq-row .mq-fraction .mq-denominator {
+      border-top: 1px solid var(--text-mid) !important;
+    }
+    /* Radical */
+    .fn-mq-row .mq-sqrt-prefix { color: var(--text-mid) !important; }
+    .fn-mq-row .mq-sqrt-stem   { border-top-color: var(--text-mid) !important; }
+    /* Cursor */
+    .fn-mq-row .mq-cursor { border-left-color: var(--accent) !important; }
+    /* Selection */
+    .fn-mq-row .mq-selection,
+    .fn-mq-row .mq-selection * {
+      background: rgba(79,255,176,0.2) !important;
+      color: #fff !important;
+    }
 
-    .fn-preview {
-      padding: 4px 12px 8px;
-      min-height: 28px;
+    /* Fix brackets — kill MathQuill's scale/translate so they stay inline */
+    .fn-mq-row .mq-paren {
+      transform: none !important;
+      vertical-align: 0.1em !important;
+      font-size: 1em !important;
+      line-height: inherit !important;
     }
-    .fn-preview .katex { font-size: 15px; }
-    .fn-preview .katex-html { color: var(--text); }
 
-    .fn-error-text {
-      font-size: 10px; color: #ff6b6b;
-      padding: 0 12px 8px;
-      font-family: 'Space Mono', monospace;
-    }
+    .fn-error-text { font-size: 10px; color: #ff6b6b; padding: 0 13px 8px; font-family: 'Space Mono', monospace; }
+    .fn-result { font-size: 11px; color: var(--accent); padding: 4px 13px 10px; font-family: "Space Mono", monospace; display: flex; align-items: baseline; gap: 6px; }
+    .fn-result .fn-result-label { color: var(--text-dim); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
+    .fn-result .fn-result-val { font-size: 14px; font-weight: 700; }
+    .fn-result-wrap { border-top: 1px solid var(--border); }
 
     .add-fn-btn {
-      margin: 4px 8px 8px;
-      padding: 9px 12px;
-      background: transparent;
-      border: 1px dashed var(--border2);
-      color: var(--text-mid);
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      transition: all 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
+      margin: 4px 8px 8px; padding: 9px 12px;
+      background: transparent; border: 1px dashed var(--border2);
+      color: var(--text-mid); border-radius: 8px; cursor: pointer;
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
     }
-    .add-fn-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: #e4e4eb;
-    }
+    .add-fn-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,255,176,0.06); }
 
-    .sidebar-footer {
-      padding: 10px;
-      border-top: 1px solid var(--border);
-      display: flex; flex-direction: column; gap: 6px;
-    }
-    .reset-btn {
-      padding: 7px;
-      background: var(--panel2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-mid);
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      cursor: pointer;
-      transition: all 0.2s; width: 100%;
-    }
-    .reset-btn:hover { color: var(--text); border-color: var(--text-mid); }
-    .view-info {
-      font-size: 9px; color: var(--text-dim);
-      text-align: center; letter-spacing: 0.5px;
-    }
+    .sidebar-footer { padding: 10px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+    .reset-btn { padding: 7px; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-mid); font-family: 'Space Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; width: 100%; }
+    .reset-btn:hover { border-color: var(--text-mid); }
+    .view-info { font-size: 9px; color: var(--text-dim); text-align: center; letter-spacing: 0.5px; }
 
-    /* ── Canvas ── */
     .graph-wrap { flex: 1; position: relative; overflow: hidden; }
-    #graph-canvas {
-      display: block; width: 100%; height: 100%;
-      cursor: crosshair;
-    }
+    #graph-canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
     #graph-canvas.dragging { cursor: grabbing; }
-    .coords-pill {
-      position: absolute; bottom: 12px; right: 14px;
-      background: rgba(11,11,20,0.85);
-      border: 1px solid var(--border2);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 10px; color: var(--text-mid);
-      backdrop-filter: blur(10px);
-      pointer-events: none;
-      letter-spacing: 0.5px;
-    }
+    .coords-pill { position: absolute; bottom: 12px; right: 14px; background: rgba(11,11,20,0.85); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; font-size: 10px; color: var(--text-mid); backdrop-filter: blur(10px); pointer-events: none; letter-spacing: 0.5px; }
+    #graph-3d { position: absolute; inset: 0; display: none; background: #2a2a52; }
+    #graph-3d canvas { display: block; }
+    .mode-badge { position: absolute; top: 12px; left: 12px; background: rgba(11,11,20,0.85); border: 1px solid var(--accent); border-radius: 20px; padding: 4px 12px; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); pointer-events: none; }
+    .graph-3d-hint { position: absolute; bottom: 12px; left: 12px; font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px; pointer-events: none; }
 
-    /* ── Keyboard ── */
-    .keyboard-panel {
-      background: var(--panel);
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .keyboard-header {
-      display: flex; align-items: center;
-      padding: 7px 16px;
-      cursor: pointer; user-select: none;
-      font-size: 9px; letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      transition: color 0.15s;
-    }
-    .keyboard-header:hover { color: var(--text); }
+    /* ─── Keyboard ─── */
+    .keyboard-panel { background: var(--panel); border-top: 1px solid var(--border); flex-shrink: 0; }
+    .keyboard-header { display: flex; align-items: center; padding: 7px 16px; cursor: pointer; user-select: none; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); transition: color 0.15s; }
+    .keyboard-header:hover { color: var(--text-mid); }
     .keyboard-header .kh-arrow { margin-left: auto; font-size: 10px; }
-
-    .keyboard-body {
-      padding: 8px 12px 10px;
-      display: flex; gap: 14px;
-      overflow-x: auto;
-      border-top: 1px solid var(--border);
-    }
+    .keyboard-body { padding: 8px 12px 10px; display: flex; gap: 14px; overflow-x: auto; border-top: 1px solid var(--border); }
     .key-group { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
-    .key-group-label {
-      font-size: 8px; letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-dim); margin-bottom: 1px;
-    }
+    .key-group-label { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1px; }
     .key-row { display: flex; gap: 4px; }
-    .key-btn {
-      padding: 5px 9px;
-      background: var(--panel2);
-      border: 1px solid var(--border2);
-      border-radius: 5px;
-      color: var(--text);
-      font-family: 'Space Mono', monospace;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.12s;
-      white-space: nowrap; line-height: 1.3;
-    }
-    .key-btn:hover {
-      background: #b9b9c2;
-      border-color: rgba(79,255,176,0.5);
-      color: var(--accent);
-    }
+    .key-btn { padding: 5px 9px; background: var(--panel2); border: 1px solid var(--border2); border-radius: 5px; color: var(--text-mid); font-family: 'Space Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.12s; white-space: nowrap; line-height: 1.3; min-width: 36px; display: inline-flex; align-items: center; justify-content: center; }
+    .key-btn:hover { background: rgba(79,255,176,0.08); border-color: rgba(79,255,176,0.5); color: var(--accent); }
     .key-btn:active { transform: scale(0.93); }
+    .key-btn .katex { font-size: 13px; color: inherit !important; }
+    .key-btn .katex * { color: inherit !important; }
 
-    /* ── Scrollbars ── */
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-    /* ── KaTeX override ── */
-    .katex { color: var(--text) !important; }
-    .katex-html { white-space: normal !important; }
-
-    /* Legend on canvas */
-    .fn-legend {
-      position: absolute;
-      top: 12px; left: 12px;
-      display: flex; flex-direction: column; gap: 4px;
-      pointer-events: none;
-    }
-    .fn-legend-item {
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(11,11,20,0.75);
-      border-radius: 5px;
-      padding: 3px 8px;
-      font-size: 10px;
-      border-left: 2px solid var(--lc);
-      color: var(--text-mid);
-    }
   </style>
 </head>
 <body>
 
 <header>
-  <div>
-    <div class="logo">Graphy.<em>io</em></div>
-  </div>
-  <span class="header-hint">scroll to zoom · drag to pan · enter to add function</span>
+  <div class="logo">Graphy.<em>io</em></div>
+  <span class="header-hint">scroll to zoom · drag to pan · type / to make a fraction · ^ for powers</span>
 </header>
 
 <div class="main">
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-title">Functions</div>
     <div class="functions-list" id="functions-list"></div>
@@ -314,15 +200,16 @@
     </div>
   </div>
 
-  <!-- Graph -->
   <div class="graph-wrap" id="graph-wrap">
     <canvas id="graph-canvas"></canvas>
     <div class="coords-pill" id="coords-pill">x: 0.000 &nbsp; y: 0.000</div>
+    <div id="graph-3d"></div>
+    <div class="mode-badge" id="mode-badge" style="display:none">3D Surface</div>
+    <div class="graph-3d-hint" id="graph-3d-hint" style="display:none">drag to orbit · scroll to zoom</div>
   </div>
 </div>
 
-<!-- Math Keyboard -->
-<div class="keyboard-panel" id="keyboard-panel">
+<div class="keyboard-panel">
   <div class="keyboard-header" id="keyboard-header">
     <span>⌨&nbsp;&nbsp;Math Keyboard</span>
     <span class="kh-arrow" id="kh-arrow">▲</span>
@@ -331,567 +218,971 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════
-// CONSTANTS & STATE
-// ═══════════════════════════════════════════
-const FN_COLORS = [
-  '#4fffb0', '#ff6b6b', '#fbbf24', '#a78bfa',
-  '#38bdf8', '#fb923c', '#f472b6', '#34d399'
-];
-
-let functions = [];
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+const FN_COLORS = ['#4fffb0','#ff6b6b','#fbbf24','#a78bfa','#38bdf8','#fb923c','#f472b6','#34d399'];
+let functions   = [];
 let fnIdCounter = 0;
-let activeFnId = null;
+let activeFnId  = null;
+const mathFields = {};
 
-let view = { xMin: -10, xMax: 10, yMin: -7, yMax: 7 };
-let isDragging = false;
-let dragOrigin = null;
-let dragViewSnap = null;
-
+let view = { xMin:-10, xMax:10, yMin:-7, yMax:7 };
+let isDragging=false, dragOrigin=null, dragViewSnap=null;
 const DPR = window.devicePixelRatio || 1;
 
-// ═══════════════════════════════════════════
+// 3D state (hoisted so resizeCanvas can reference them)
+let renderer3d=null, scene3d=null, camera3d=null;
+const orbit3d = { theta:0.7, phi:0.55, radius:22, dragging:false, lastX:0, lastY:0 };
+
+// ════════════════════════════════════════
+// MATHQUILL
+// ════════════════════════════════════════
+const MQ = MathQuill.getInterface(2);
+
+// ════════════════════════════════════════
 // CANVAS
-// ═══════════════════════════════════════════
-const canvas = document.getElementById('graph-canvas');
-const ctx = canvas.getContext('2d');
+// ════════════════════════════════════════
+const canvas    = document.getElementById('graph-canvas');
+const ctx       = canvas.getContext('2d');
 const graphWrap = document.getElementById('graph-wrap');
+const W = () => canvas.width, H = () => canvas.height;
 
 function resizeCanvas() {
-  const w = graphWrap.clientWidth;
-  const h = graphWrap.clientHeight;
-  canvas.width = w * DPR;
-  canvas.height = h * DPR;
-  canvas.style.width = w + 'px';
-  canvas.style.height = h + 'px';
+  const w=graphWrap.clientWidth, h=graphWrap.clientHeight;
+  canvas.width=w*DPR; canvas.height=h*DPR;
+  canvas.style.width=w+'px'; canvas.style.height=h+'px';
+  if(renderer3d){ renderer3d.setSize(w,h); camera3d.aspect=w/h; camera3d.updateProjectionMatrix(); }
   drawAll();
 }
+new ResizeObserver(resizeCanvas).observe(graphWrap);
 
-const resizeObs = new ResizeObserver(resizeCanvas);
-resizeObs.observe(graphWrap);
+const toCanvasX = mx => (mx-view.xMin)/(view.xMax-view.xMin)*W();
+const toCanvasY = my => H()-(my-view.yMin)/(view.yMax-view.yMin)*H();
+const toMathX   = cx => view.xMin+cx/W()*(view.xMax-view.xMin);
+const toMathY   = cy => view.yMin+(H()-cy)/H()*(view.yMax-view.yMin);
 
-// ═══════════════════════════════════════════
-// COORDINATE TRANSFORMS
-// ═══════════════════════════════════════════
-const W = () => canvas.width;
-const H = () => canvas.height;
-
-const toCanvasX = mx => (mx - view.xMin) / (view.xMax - view.xMin) * W();
-const toCanvasY = my => H() - (my - view.yMin) / (view.yMax - view.yMin) * H();
-const toMathX   = cx => view.xMin + cx / W() * (view.xMax - view.xMin);
-const toMathY   = cy => view.yMin + (H() - cy) / H() * (view.yMax - view.yMin);
-
-// ═══════════════════════════════════════════
-// DRAWING
-// ═══════════════════════════════════════════
-function niceStep(range, targetTicks = 10) {
-  const raw = range / targetTicks;
-  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
-  const n = raw / mag;
-  return (n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10) * mag;
-}
-
-function formatTick(val) {
-  const s = parseFloat(val.toPrecision(5)).toString();
-  return s.length > 7 ? val.toExponential(2) : s;
-}
+function niceStep(r){ const raw=r/10, mag=Math.pow(10,Math.floor(Math.log10(raw))), n=raw/mag; return (n<1.5?1:n<3?2:n<7?5:10)*mag; }
+function fmtTick(v){ const s=parseFloat(v.toPrecision(5)).toString(); return s.length>7?v.toExponential(2):s; }
 
 function drawAll() {
-  const Wc = W(), Hc = H();
-  ctx.clearRect(0, 0, Wc, Hc);
+  // ── Switch 2D/3D mode ──
+  const has3D = functions.some(fn=>fn.visible && fn.is3D && fn.compiled);
+  const el2d = document.getElementById('graph-canvas');
+  const el3d = document.getElementById('graph-3d');
+  const badge = document.getElementById('mode-badge');
+  const hint3d = document.getElementById('graph-3d-hint');
+  el2d.style.display   = has3D ? 'none'  : 'block';
+  el3d.style.display   = has3D ? 'block' : 'none';
+  badge.style.display  = has3D ? ''      : 'none';
+  hint3d.style.display = has3D ? ''      : 'none';
+  if(has3D){ update3D(); return; }
 
-  // Background
-  ctx.fillStyle = '#2a2a52';
-  ctx.fillRect(0, 0, Wc, Hc);
+  const Wc=W(), Hc=H();
+  ctx.clearRect(0,0,Wc,Hc);
+  ctx.fillStyle='#2a2a52'; ctx.fillRect(0,0,Wc,Hc);
 
-  const xRange = view.xMax - view.xMin;
-  const yRange = view.yMax - view.yMin;
-  const step = niceStep(Math.max(xRange, yRange));
-
-  const xStart = Math.ceil(view.xMin / step) * step;
-  const yStart = Math.ceil(view.yMin / step) * step;
-
-  // Minor grid lines
-  ctx.lineWidth = 1;
-  for (let x = Math.floor(view.xMin / step) * step; x <= view.xMax + step; x += step) {
-    const cx = toCanvasX(x);
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, Hc); ctx.stroke();
+  const step=niceStep(Math.max(view.xMax-view.xMin, view.yMax-view.yMin));
+  ctx.lineWidth=1;
+  for(let x=Math.floor(view.xMin/step)*step; x<=view.xMax+step; x+=step){
+    const cx=toCanvasX(x); ctx.strokeStyle='rgba(255,255,255,0.04)';
+    ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,Hc); ctx.stroke();
   }
-  for (let y = Math.floor(view.yMin / step) * step; y <= view.yMax + step; y += step) {
-    const cy = toCanvasY(y);
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(Wc, cy); ctx.stroke();
-  }
-
-  // Axes
-  const axX = toCanvasX(0);
-  const axY = toCanvasY(0);
-  ctx.lineWidth = 1.5 * DPR;
-
-  if (axX >= 0 && axX <= Wc) {
-    const grad = ctx.createLinearGradient(0, 0, 0, Hc);
-    grad.addColorStop(0, 'rgba(255,255,255,0)');
-    grad.addColorStop(0.5, 'rgba(255,255,255,0.22)');
-    grad.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.strokeStyle = grad;
-    ctx.beginPath(); ctx.moveTo(axX, 0); ctx.lineTo(axX, Hc); ctx.stroke();
-  }
-  if (axY >= 0 && axY <= Hc) {
-    const grad = ctx.createLinearGradient(0, 0, Wc, 0);
-    grad.addColorStop(0, 'rgba(255,255,255,0)');
-    grad.addColorStop(0.5, 'rgba(255,255,255,0.22)');
-    grad.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.strokeStyle = grad;
-    ctx.beginPath(); ctx.moveTo(0, axY); ctx.lineTo(Wc, axY); ctx.stroke();
+  for(let y=Math.floor(view.yMin/step)*step; y<=view.yMax+step; y+=step){
+    const cy=toCanvasY(y); ctx.strokeStyle='rgba(255,255,255,0.04)';
+    ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(Wc,cy); ctx.stroke();
   }
 
-  // Tick marks & labels
-  const FONT_SIZE = 10 * DPR;
-  ctx.font = `${FONT_SIZE}px 'Space Mono', monospace`;
-  const TICK = 4 * DPR;
-  const CLAMP_AX = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-  const clampedAxX = CLAMP_AX(axX, 30 * DPR, Wc - 4);
-  const clampedAxY = CLAMP_AX(axY, 4, Hc - 18 * DPR);
+  const axX=toCanvasX(0), axY=toCanvasY(0);
+  ctx.lineWidth=1.5*DPR;
+  if(axX>=0&&axX<=Wc){ const g=ctx.createLinearGradient(0,0,0,Hc); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.5,'rgba(255,255,255,0.22)'); g.addColorStop(1,'rgba(255,255,255,0)'); ctx.strokeStyle=g; ctx.beginPath(); ctx.moveTo(axX,0); ctx.lineTo(axX,Hc); ctx.stroke(); }
+  if(axY>=0&&axY<=Hc){ const g=ctx.createLinearGradient(0,0,Wc,0); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.5,'rgba(255,255,255,0.22)'); g.addColorStop(1,'rgba(255,255,255,0)'); ctx.strokeStyle=g; ctx.beginPath(); ctx.moveTo(0,axY); ctx.lineTo(Wc,axY); ctx.stroke(); }
 
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-  ctx.fillStyle = 'rgba(255,255,255,0.32)';
+  const TICK=4*DPR, clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
+  const cAX=clamp(axX,30*DPR,Wc-4), cAY=clamp(axY,4,Hc-18*DPR);
+  ctx.font=`${10*DPR}px 'Space Mono',monospace`; ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.fillStyle='rgba(255,255,255,0.32)';
+  const xS=Math.ceil(view.xMin/step)*step;
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  for(let x=xS; x<=view.xMax+step*.01; x+=step){ if(Math.abs(x)<step*.01) continue; const cx=toCanvasX(x); if(cx<0||cx>Wc) continue; ctx.beginPath(); ctx.moveTo(cx,cAY-TICK); ctx.lineTo(cx,cAY+TICK); ctx.stroke(); ctx.fillText(fmtTick(x),cx,cAY+TICK+2); }
+  const yS=Math.ceil(view.yMin/step)*step;
+  ctx.textAlign='right'; ctx.textBaseline='middle';
+  for(let y=yS; y<=view.yMax+step*.01; y+=step){ if(Math.abs(y)<step*.01) continue; const cy=toCanvasY(y); if(cy<0||cy>Hc) continue; ctx.beginPath(); ctx.moveTo(cAX-TICK,cy); ctx.lineTo(cAX+TICK,cy); ctx.stroke(); ctx.fillText(fmtTick(y),cAX-TICK-3,cy); }
+  if(axX>=0&&axX<=Wc&&axY>=0&&axY<=Hc){ ctx.textAlign='right'; ctx.textBaseline='top'; ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillText('0',axX-5,axY+5); }
 
-  // X ticks
-  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  for (let x = xStart; x <= view.xMax + step * 0.01; x += step) {
-    if (Math.abs(x) < step * 0.01) continue;
-    const cx = toCanvasX(x);
-    if (cx < 0 || cx > Wc) continue;
-    ctx.beginPath();
-    ctx.moveTo(cx, clampedAxY - TICK);
-    ctx.lineTo(cx, clampedAxY + TICK);
-    ctx.stroke();
-    ctx.fillText(formatTick(x), cx, clampedAxY + TICK + 2);
-  }
+  ctx.fillStyle=ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=1.5*DPR;
+  const ARW=7*DPR;
+  if(axY>=0&&axY<=Hc){ ctx.beginPath(); ctx.moveTo(Wc-ARW*1.8,axY-ARW*.6); ctx.lineTo(Wc,axY); ctx.lineTo(Wc-ARW*1.8,axY+ARW*.6); ctx.stroke(); ctx.font=`italic ${12*DPR}px Georgia,serif`; ctx.textAlign='right'; ctx.textBaseline='bottom'; ctx.fillText('x',Wc-3,axY-2); }
+  if(axX>=0&&axX<=Wc){ ctx.beginPath(); ctx.moveTo(axX-ARW*.6,ARW*1.8); ctx.lineTo(axX,0); ctx.lineTo(axX+ARW*.6,ARW*1.8); ctx.stroke(); ctx.font=`italic ${12*DPR}px Georgia,serif`; ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillText('y',axX+4,2); }
 
-  // Y ticks
-  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-  for (let y = yStart; y <= view.yMax + step * 0.01; y += step) {
-    if (Math.abs(y) < step * 0.01) continue;
-    const cy = toCanvasY(y);
-    if (cy < 0 || cy > Hc) continue;
-    ctx.beginPath();
-    ctx.moveTo(clampedAxX - TICK, cy);
-    ctx.lineTo(clampedAxX + TICK, cy);
-    ctx.stroke();
-    ctx.fillText(formatTick(y), clampedAxX - TICK - 3, cy);
-  }
-
-  // Origin
-  if (axX >= 0 && axX <= Wc && axY >= 0 && axY <= Hc) {
-    ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-    ctx.fillStyle = 'rgba(255,255,255,0.2)';
-    ctx.fillText('0', axX - 5, axY + 5);
-  }
-
-  // Axis arrows + labels
-  ctx.fillStyle = 'rgba(255,255,255,0.3)';
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-  ctx.lineWidth = 1.5 * DPR;
-  const ARW = 7 * DPR;
-  if (axY >= 0 && axY <= Hc) {
-    ctx.beginPath();
-    ctx.moveTo(Wc - ARW * 1.8, axY - ARW * 0.6);
-    ctx.lineTo(Wc, axY);
-    ctx.lineTo(Wc - ARW * 1.8, axY + ARW * 0.6);
-    ctx.stroke();
-    ctx.font = `italic ${12 * DPR}px Georgia, serif`;
-    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-    ctx.fillText('x', Wc - 3, axY - 2);
-  }
-  if (axX >= 0 && axX <= Wc) {
-    ctx.beginPath();
-    ctx.moveTo(axX - ARW * 0.6, ARW * 1.8);
-    ctx.lineTo(axX, 0);
-    ctx.lineTo(axX + ARW * 0.6, ARW * 1.8);
-    ctx.stroke();
-    ctx.font = `italic ${12 * DPR}px Georgia, serif`;
-    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-    ctx.fillText('y', axX + 4, 2);
-  }
-
-  // Draw functions
-  functions.forEach(fn => {
-    if (fn.visible && fn.compiled) drawFunction(fn);
+  functions.forEach(fn=>{
+    if(!fn.visible) return;
+    if(fn.type==='function' && fn.compiled) drawFn(fn);
+    if(fn.type==='point' && fn.pointCoords) drawPoint(fn);
   });
-
-  // Update view info
-  document.getElementById('view-info').textContent =
-    `x: [${view.xMin.toFixed(2)}, ${view.xMax.toFixed(2)}]  y: [${view.yMin.toFixed(2)}, ${view.yMax.toFixed(2)}]`;
+  // Draw analysis overlays on top
+  functions.forEach(fn=>{
+    if(fn.visible && fn.type==='function' && fn.compiled && fn.showAnalysis) drawAnalysis(fn);
+  });
+  // Draw curve letter labels
+  functions.forEach(fn=>{
+    if(!fn.visible || !fn.letter || fn.type!=='function' || !fn.compiled) return;
+    // Sample a few x values and find a visible, non-extreme point to label
+    const candidates = [view.xMax * 0.85, view.xMax * 0.6, 0, view.xMin * 0.6];
+    for(const tx of candidates){
+      try{
+        const ty = fn.compiled.evaluate(buildScope(tx));
+        if(typeof ty!=='number'||!isFinite(ty)||isNaN(ty)) continue;
+        const cx=toCanvasX(tx), cy=toCanvasY(ty);
+        if(cx<10||cx>W()-10||cy<10||cy>H()-10) continue;
+        ctx.save();
+        ctx.font=`bold ${13*DPR}px 'Syne',sans-serif`;
+        ctx.fillStyle=fn.color;
+        ctx.globalAlpha=0.9;
+        ctx.textAlign='left'; ctx.textBaseline='bottom';
+        ctx.fillText(fn.letter, cx+6*DPR, cy-4*DPR);
+        ctx.restore();
+        break;
+      } catch(_){}
+    }
+  });
+  document.getElementById('view-info').textContent=`x: [${view.xMin.toFixed(2)}, ${view.xMax.toFixed(2)}]  y: [${view.yMin.toFixed(2)}, ${view.yMax.toFixed(2)}]`;
 }
 
-function drawFunction(fn) {
-  const Wc = W(), Hc = H();
-  const steps = Math.ceil(Wc * 1.5);
-  const dx = (view.xMax - view.xMin) / steps;
-  const yRange = view.yMax - view.yMin;
-
+function drawPoint(fn) {
+  const {x, y} = fn.pointCoords;
+  const cx=toCanvasX(x), cy=toCanvasY(y);
+  const R=7*DPR;
   ctx.save();
-  ctx.strokeStyle = fn.color;
-  ctx.lineWidth = 2.2 * DPR;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.shadowColor = fn.color;
-  ctx.shadowBlur = 5 * DPR;
-
-  ctx.beginPath();
-  let penDown = false;
-  let prevY = null;
-
-  for (let i = 0; i <= steps; i++) {
-    const x = view.xMin + i * dx;
-    let y;
-    try {
-      y = fn.compiled.evaluate({ x });
-      if (typeof y !== 'number' || !isFinite(y) || isNaN(y)) throw 0;
-    } catch (_) {
-      penDown = false; prevY = null; continue;
-    }
-
-    const cx = toCanvasX(x);
-    const cy = toCanvasY(y);
-    const discontinuous = prevY !== null && Math.abs(y - prevY) > yRange * 3;
-
-    if (!penDown || discontinuous) {
-      ctx.moveTo(cx, cy); penDown = true;
-    } else {
-      ctx.lineTo(cx, cy);
-    }
-    prevY = y;
-  }
-  ctx.stroke();
+  ctx.shadowColor=fn.color; ctx.shadowBlur=12*DPR;
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.fillStyle=fn.color; ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.beginPath(); ctx.arc(cx,cy,R*0.35,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.fill();
+  ctx.font=`${11*DPR}px 'Space Mono',monospace`;
+  ctx.fillStyle=fn.color;
+  ctx.textAlign='left'; ctx.textBaseline='bottom';
+  const lx=parseFloat(x.toPrecision(5)), ly=parseFloat(y.toPrecision(5));
+  ctx.fillText(`(${lx}, ${ly})`, cx+R+3, cy-3);
   ctx.restore();
 }
 
-// ═══════════════════════════════════════════
-// INTERACTIONS
-// ═══════════════════════════════════════════
-function evPos(e) {
-  const rect = canvas.getBoundingClientRect();
-  const src = e.touches ? e.touches[0] : e;
-  return {
-    x: (src.clientX - rect.left) * DPR,
-    y: (src.clientY - rect.top) * DPR
-  };
+// Build a math.js scope that exposes every compiled function as a callable letter
+function buildScope(xVal) {
+  const scope = { x: xVal };
+  functions.forEach(f => {
+    if(f.letter && f.compiled) {
+      scope[f.letter] = (v) => {
+        try {
+          const s = { x: v };
+          // Inject other letters too so chained calls work
+          functions.forEach(f2 => {
+            if(f2.letter && f2.compiled && f2.letter !== f.letter)
+              s[f2.letter] = (v2) => { try{ return f2.compiled.evaluate({x:v2}); } catch(_){ return NaN; } };
+          });
+          return f.compiled.evaluate(s);
+        } catch(_) { return NaN; }
+      };
+    }
+  });
+  return scope;
 }
 
-canvas.addEventListener('mousedown', e => {
-  isDragging = true;
-  dragOrigin = evPos(e);
-  dragViewSnap = { ...view };
-  canvas.classList.add('dragging');
-});
-
-canvas.addEventListener('mousemove', e => {
-  const pos = evPos(e);
-  const mx = toMathX(pos.x).toFixed(3);
-  const my = toMathY(pos.y).toFixed(3);
-  document.getElementById('coords-pill').innerHTML = `x: ${mx} &nbsp; y: ${my}`;
-
-  if (!isDragging) return;
-  const dxPx = pos.x - dragOrigin.x;
-  const dyPx = pos.y - dragOrigin.y;
-  const dxM = dxPx / W() * (dragViewSnap.xMax - dragViewSnap.xMin);
-  const dyM = dyPx / H() * (dragViewSnap.yMax - dragViewSnap.yMin);
-  view.xMin = dragViewSnap.xMin - dxM;
-  view.xMax = dragViewSnap.xMax - dxM;
-  view.yMin = dragViewSnap.yMin + dyM;
-  view.yMax = dragViewSnap.yMax + dyM;
-  drawAll();
-});
-
-window.addEventListener('mouseup', () => {
-  isDragging = false;
-  canvas.classList.remove('dragging');
-});
-canvas.addEventListener('mouseleave', () => {
-  if (isDragging) { isDragging = false; canvas.classList.remove('dragging'); }
-});
-
-canvas.addEventListener('wheel', e => {
-  e.preventDefault();
-  const pos = evPos(e);
-  const mx = toMathX(pos.x);
-  const my = toMathY(pos.y);
-  const factor = e.deltaY > 0 ? 1.12 : 1 / 1.12;
-  view.xMin = mx + (view.xMin - mx) * factor;
-  view.xMax = mx + (view.xMax - mx) * factor;
-  view.yMin = my + (view.yMin - my) * factor;
-  view.yMax = my + (view.yMax - my) * factor;
-  drawAll();
-}, { passive: false });
-
-// ═══════════════════════════════════════════
-// FUNCTION MANAGEMENT
-// ═══════════════════════════════════════════
-function compileFn(fn) {
-  const expr = fn.expr.trim();
-  if (!expr) { fn.compiled = null; fn.latex = ''; fn.error = null; return; }
-  try {
-    const parsed = math.parse(expr);
-    fn.compiled = parsed.compile();
-    fn.latex = parsed.toTex({ parenthesis: 'auto' });
-    fn.error = null;
-  } catch (e) {
-    fn.compiled = null; fn.latex = ''; fn.error = 'Invalid expression';
+function drawFn(fn) {
+  const Wc=W(), steps=Math.ceil(Wc*1.5), dx=(view.xMax-view.xMin)/steps, yRange=view.yMax-view.yMin;
+  ctx.save(); ctx.strokeStyle=fn.color; ctx.lineWidth=2.2*DPR; ctx.lineJoin='round'; ctx.lineCap='round';
+  ctx.shadowColor=fn.color; ctx.shadowBlur=5*DPR; ctx.beginPath();
+  let penDown=false, prevY=null;
+  for(let i=0;i<=steps;i++){
+    const x=view.xMin+i*dx; let y;
+    try{
+      y=fn.compiled.evaluate(buildScope(x));
+      if(typeof y!=='number'||!isFinite(y)||isNaN(y)) throw 0;
+    } catch(_){ penDown=false; prevY=null; continue; }
+    const cx=toCanvasX(x), cy=toCanvasY(y), disc=prevY!==null&&Math.abs(y-prevY)>yRange*3;
+    if(!penDown||disc){ ctx.moveTo(cx,cy); penDown=true; } else { ctx.lineTo(cx,cy); }
+    prevY=y;
   }
+  ctx.stroke(); ctx.restore();
 }
 
-function addFunction(expr = '') {
-  const id = fnIdCounter++;
-  const color = FN_COLORS[functions.length % FN_COLORS.length];
-  const fn = { id, expr, color, compiled: null, visible: true, latex: '', error: null };
-  functions.push(fn);
-  if (expr) compileFn(fn);
+// ════════════════════════════════════════
+// ANALYSIS ENGINE
+// ════════════════════════════════════════
+function analyseFunction(fn) {
+  const f = v => {
+    try{
+      const y=fn.compiled.evaluate(buildScope(v));
+      return (typeof y==='number'&&isFinite(y)&&!isNaN(y))?y:NaN;
+    } catch(_){ return NaN; }
+  };
+
+  // Two-pass sweep: coarse global + fine around current view
+  const passes = [
+    { lo:-1000, hi:1000, steps:10000 },
+    { lo:view.xMin-1, hi:view.xMax+1, steps:8000 }
+  ];
+
+  const xIntercepts=[], vAsymptotes=[];
+
+  passes.forEach(({lo,hi,steps})=>{
+    const dx=(hi-lo)/steps;
+    let prevY=NaN, prevX=NaN;
+    for(let i=0;i<=steps;i++){
+      const x=lo+i*dx, y=f(x);
+      if(!isNaN(y)&&!isNaN(prevY)){
+        // X-intercept: sign change
+        if(prevY*y<0){
+          let a=prevX,b=x,fa=prevY,fb=y;
+          for(let j=0;j<60;j++){
+            const m=(a+b)/2, fm=f(m);
+            if(isNaN(fm)) break;
+            if(Math.abs(fm)<1e-12){a=b=m;break;}
+            if(fa*fm<=0){b=m;fb=fm;}else{a=m;fa=fm;}
+          }
+          const root=parseFloat(((a+b)/2).toPrecision(7));
+          if(!xIntercepts.some(r=>Math.abs(r-root)<1e-5)) xIntercepts.push(root);
+        }
+        // Vertical asymptote: one side finite→large, other NaN or huge opposite sign
+        const bigJump = Math.abs(y-prevY) > Math.max(1e4, Math.abs(prevY)*100+Math.abs(y)*100);
+        const bothLarge = Math.abs(y)>500 && Math.abs(prevY)>500;
+        if(bigJump && bothLarge){
+          const ax=parseFloat(((prevX+x)/2).toPrecision(5));
+          if(!vAsymptotes.some(a=>Math.abs(a-ax)<Math.abs(dx)*3)) vAsymptotes.push(ax);
+        }
+      }
+      // NaN sandwich: finite → NaN → finite with sign flip = asymptote
+      if(isNaN(y) && !isNaN(prevY) && Math.abs(prevY)>1){
+        // Look ahead
+        const nextY=f(prevX+dx*2);
+        if(!isNaN(nextY)&&prevY*nextY<0){
+          const ax=parseFloat(((prevX+dx*0.5)).toPrecision(5));
+          if(!vAsymptotes.some(a=>Math.abs(a-ax)<Math.abs(dx)*3)) vAsymptotes.push(ax);
+        }
+      }
+      prevY=y; prevX=x;
+    }
+  });
+
+  // Y-intercept
+  const yRaw=f(0);
+  const yIntercept = (!isNaN(yRaw)&&isFinite(yRaw)) ? parseFloat(yRaw.toPrecision(6)) : null;
+
+  // Horizontal asymptotes: check if function levels off at ±∞
+  const hAsymptotes=[];
+  const checkH=(sign)=>{
+    const samples=[1e4,1e5,1e6,1e7].map(v=>f(sign*v));
+    if(samples.some(isNaN)) return;
+    const diffs=samples.map((v,i)=>i?Math.abs(v-samples[i-1]):Infinity);
+    if(diffs[1]<0.01&&diffs[2]<0.01&&diffs[3]<0.01){
+      const val=parseFloat(samples[3].toPrecision(5));
+      hAsymptotes.push({val, side:sign>0?'x→+∞':'x→-∞'});
+    }
+  };
+  checkH(1); checkH(-1);
+  if(hAsymptotes.length===2&&Math.abs(hAsymptotes[0].val-hAsymptotes[1].val)<0.001)
+    hAsymptotes.splice(1,1,{val:hAsymptotes[0].val,side:'both'});
+
+  return { xIntercepts, yIntercept, vAsymptotes, hAsymptotes };
+}
+
+function drawAnalysis(fn) {
+  if(!fn.analysis) return;
+  const {xIntercepts, yIntercept, vAsymptotes, hAsymptotes} = fn.analysis;
+  const Wc=W(), Hc=H();
+  const col = fn.color;
+  const FONT = `${10*DPR}px 'Space Mono',monospace`;
+
+  ctx.save();
+
+  // ── Vertical asymptotes — full-height dotted line ──
+  vAsymptotes.forEach(ax=>{
+    const cx=toCanvasX(ax);
+    if(cx<0||cx>Wc) return;
+    ctx.setLineDash([5*DPR, 4*DPR]);
+    ctx.lineWidth=1.5*DPR;
+    ctx.strokeStyle=col;
+    ctx.globalAlpha=0.6;
+    ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,Hc); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha=1;
+    // Label at top
+    ctx.font=`bold ${FONT}`;
+    ctx.fillStyle=col;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    const bg = ctx.fillStyle;
+    ctx.fillText(`x = ${parseFloat(ax.toPrecision(5))}`, cx, 6*DPR);
+  });
+
+  // ── Horizontal asymptotes — full-width dotted line ──
+  hAsymptotes.forEach(ha=>{
+    const cy=toCanvasY(ha.val);
+    if(cy<-10||cy>Hc+10) return;
+    ctx.setLineDash([5*DPR, 4*DPR]);
+    ctx.lineWidth=1.5*DPR;
+    ctx.strokeStyle=col;
+    ctx.globalAlpha=0.6;
+    ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(Wc,cy); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha=1;
+    // Label at left edge
+    ctx.font=`bold ${FONT}`;
+    ctx.fillStyle=col;
+    ctx.textAlign='left'; ctx.textBaseline='bottom';
+    const label = ha.side==='y' ? `y = ${ha.val}` : `y → ${ha.val}  (${ha.side})`;
+    ctx.fillText(label, 6*DPR, cy - 4*DPR);
+  });
+
+  // ── X-intercepts — dot on axis ──
+  xIntercepts.forEach(xi=>{
+    const cx=toCanvasX(xi), cy=toCanvasY(0);
+    if(cx<0||cx>Wc) return;
+    ctx.beginPath(); ctx.arc(cx,cy,5*DPR,0,Math.PI*2);
+    ctx.fillStyle=col; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy,2.5*DPR,0,Math.PI*2);
+    ctx.fillStyle='#1a1a38'; ctx.fill();
+    ctx.font=FONT; ctx.fillStyle=col;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(`(${parseFloat(xi.toPrecision(5))}, 0)`, cx, cy+8*DPR);
+  });
+
+  // ── Y-intercept — dot on axis ──
+  if(yIntercept!==null){
+    const cx=toCanvasX(0), cy=toCanvasY(yIntercept);
+    if(cx>=0&&cx<=Wc&&cy>=0&&cy<=Hc){
+      ctx.beginPath(); ctx.arc(cx,cy,5*DPR,0,Math.PI*2);
+      ctx.fillStyle=col; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx,cy,2.5*DPR,0,Math.PI*2);
+      ctx.fillStyle='#1a1a38'; ctx.fill();
+      ctx.font=FONT; ctx.fillStyle=col;
+      ctx.textAlign='left'; ctx.textBaseline='middle';
+      ctx.fillText(`(0, ${parseFloat(yIntercept.toPrecision(5))})`, cx+8*DPR, cy);
+    }
+  }
+
+  ctx.restore();
+}
+// CANVAS INTERACTIONS
+
+// ════════════════════════════════════════
+// 3D ENGINE  (Three.js r128)
+// ════════════════════════════════════════
+
+
+function init3D(){
+  if(renderer3d) return;
+  const wrap=document.getElementById('graph-3d');
+  const w=graphWrap.clientWidth, h=graphWrap.clientHeight;
+
+  renderer3d=new THREE.WebGLRenderer({antialias:true});
+  renderer3d.setPixelRatio(DPR);
+  renderer3d.setSize(w,h);
+  renderer3d.setClearColor(0x2a2a52);
+  wrap.appendChild(renderer3d.domElement);
+
+  scene3d=new THREE.Scene();
+  camera3d=new THREE.PerspectiveCamera(45,w/h,0.1,1000);
+  syncCamera3D();
+
+  // Lights
+  scene3d.add(new THREE.AmbientLight(0xffffff,0.45));
+  const dl=new THREE.DirectionalLight(0xffffff,0.9); dl.position.set(8,14,6); scene3d.add(dl);
+  const dl2=new THREE.DirectionalLight(0x8888ff,0.3); dl2.position.set(-8,-6,-4); scene3d.add(dl2);
+
+  // Axes helper
+  scene3d.add(new THREE.AxesHelper(12));
+
+  // Grid on xz plane
+  const grid=new THREE.GridHelper(20,20,0x444466,0x2e2e50);
+  scene3d.add(grid);
+
+  // Mouse orbit
+  const el=renderer3d.domElement;
+  el.addEventListener('mousedown',e=>{orbit3d.dragging=true;orbit3d.lastX=e.clientX;orbit3d.lastY=e.clientY;});
+  window.addEventListener('mouseup',()=>{orbit3d.dragging=false;});
+  window.addEventListener('mousemove',e=>{
+    if(!orbit3d.dragging) return;
+    orbit3d.theta-=(e.clientX-orbit3d.lastX)*0.012;
+    orbit3d.phi=Math.max(0.08,Math.min(Math.PI/2-0.02,orbit3d.phi-(e.clientY-orbit3d.lastY)*0.012));
+    orbit3d.lastX=e.clientX; orbit3d.lastY=e.clientY;
+    syncCamera3D(); render3D();
+  });
+  el.addEventListener('wheel',e=>{
+    e.preventDefault();
+    orbit3d.radius=Math.max(5,Math.min(60,orbit3d.radius+e.deltaY*0.04));
+    syncCamera3D(); render3D();
+  },{passive:false});
+}
+
+function syncCamera3D(){
+  const {radius,phi,theta}=orbit3d;
+  camera3d.position.set(
+    radius*Math.sin(phi)*Math.sin(theta),
+    radius*Math.cos(phi),
+    radius*Math.sin(phi)*Math.cos(theta)
+  );
+  camera3d.lookAt(0,0,0);
+}
+
+function build3DSurface(fn){
+  const SEGS=80;
+  const xSpan=view.xMax-view.xMin, ySpan=view.yMax-view.yMin;
+  const geo=new THREE.BufferGeometry();
+  const verts=[], cols=[], idxs=[];
+  const N=SEGS+1;
+  let zMin=Infinity, zMax=-Infinity;
+  const grid=new Array(N*N);
+
+  for(let j=0;j<N;j++){
+    for(let i=0;i<N;i++){
+      const mx=view.xMin+(i/SEGS)*xSpan;
+      const my=view.yMin+(j/SEGS)*ySpan;
+      let z=0;
+      try{
+        z=fn.compiled.evaluate({x:mx,y:my});
+        if(!isFinite(z)||isNaN(z)) z=0;
+      }catch(_){}
+      grid[j*N+i]=z;
+      if(z<zMin) zMin=z; if(z>zMax) zMax=z;
+    }
+  }
+  const zRange=Math.max(zMax-zMin,0.001);
+  // Scale so surface fits nicely: map x,y to [-10,10] space
+  const scaleX=20/xSpan, scaleY=20/ySpan, scaleZ=10/zRange;
+
+  for(let j=0;j<N;j++){
+    for(let i=0;i<N;i++){
+      const mx=view.xMin+(i/SEGS)*xSpan;
+      const my=view.yMin+(j/SEGS)*ySpan;
+      const z=grid[j*N+i];
+      verts.push((mx-(view.xMin+view.xMax)/2)*scaleX, z*scaleZ, (my-(view.yMin+view.yMax)/2)*scaleY);
+      // HSL colour by height
+      const t=(z-zMin)/zRange;
+      const hue=0.66-t*0.55; // blue→red
+      const c=new THREE.Color().setHSL(hue,0.9,0.55);
+      cols.push(c.r,c.g,c.b);
+    }
+  }
+  for(let j=0;j<SEGS;j++){
+    for(let i=0;i<SEGS;i++){
+      const a=j*N+i, b=a+1, c=a+N, d=c+1;
+      idxs.push(a,b,c, b,d,c);
+    }
+  }
+
+  geo.setIndex(idxs);
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
+  geo.computeVertexNormals();
+
+  const mat=new THREE.MeshPhongMaterial({vertexColors:true,side:THREE.DoubleSide,shininess:60,transparent:true,opacity:0.92});
+  return new THREE.Mesh(geo,mat);
+}
+
+function render3D(){ if(renderer3d&&scene3d&&camera3d) renderer3d.render(scene3d,camera3d); }
+
+function update3D(){
+  init3D();
+  // Remove old surfaces (keep lights/grid/axes: they have no userData.surface)
+  scene3d.children.filter(c=>c.userData&&c.userData.isSurface).forEach(c=>scene3d.remove(c));
+  functions.forEach(fn=>{
+    if(!fn.visible||!fn.compiled||!fn.is3D) return;
+    const mesh=build3DSurface(fn);
+    mesh.userData.isSurface=true;
+    scene3d.add(mesh);
+  });
+  render3D();
+}
+
+// ════════════════════════════════════════
+function evPos(e){ const r=canvas.getBoundingClientRect(),s=e.touches?e.touches[0]:e; return{x:(s.clientX-r.left)*DPR,y:(s.clientY-r.top)*DPR}; }
+canvas.addEventListener('mousedown',e=>{ isDragging=true; dragOrigin=evPos(e); dragViewSnap={...view}; canvas.classList.add('dragging'); });
+canvas.addEventListener('mousemove',e=>{
+  const p=evPos(e); document.getElementById('coords-pill').innerHTML=`x: ${toMathX(p.x).toFixed(3)} &nbsp; y: ${toMathY(p.y).toFixed(3)}`;
+  if(!isDragging) return;
+  const dxM=((p.x-dragOrigin.x)/W())*(dragViewSnap.xMax-dragViewSnap.xMin), dyM=((p.y-dragOrigin.y)/H())*(dragViewSnap.yMax-dragViewSnap.yMin);
+  view.xMin=dragViewSnap.xMin-dxM; view.xMax=dragViewSnap.xMax-dxM;
+  view.yMin=dragViewSnap.yMin+dyM; view.yMax=dragViewSnap.yMax+dyM; drawAll();
+});
+window.addEventListener('mouseup',()=>{ isDragging=false; canvas.classList.remove('dragging'); });
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault(); const p=evPos(e),mx=toMathX(p.x),my=toMathY(p.y),f=e.deltaY>0?1.12:1/1.12;
+  view.xMin=mx+(view.xMin-mx)*f; view.xMax=mx+(view.xMax-mx)*f;
+  view.yMin=my+(view.yMin-my)*f; view.yMax=my+(view.yMax-my)*f; drawAll();
+},{passive:false});
+
+// ════════════════════════════════════════
+// LATEX → MATH.JS CONVERTER
+// ════════════════════════════════════════
+function latexToMathjs(latex) {
+  let s = latex;
+
+  // Expand \frac{}{} iteratively, innermost first
+  for(let i=0;i<10;i++){
+    const prev=s;
+    s=s.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g,'($1)/($2)');
+    if(s===prev) break;
+  }
+  // \sqrt[n]{x} → nthRoot(x,n)
+  s=s.replace(/\\sqrt\[([^\]]+)\]\{([^{}]*)\}/g,'nthRoot($2,$1)');
+  // \sqrt{x} iteratively
+  for(let i=0;i<5;i++){
+    const prev=s;
+    s=s.replace(/\\sqrt\{([^{}]*)\}/g,'sqrt($1)');
+    if(s===prev) break;
+  }
+  // ^{n} → ^(n)
+  s=s.replace(/\^\{([^{}]*)\}/g,'^($1)');
+  // \left|…\right| → abs(…)
+  s=s.replace(/\\left\s*\|(.+?)\\right\s*\|/g,'abs($1)');
+  // \left( \right) etc.
+  s=s.replace(/\\left\s*\(/g,'(').replace(/\\right\s*\)/g,')');
+  s=s.replace(/\\left\s*\[/g,'(').replace(/\\right\s*\]/g,')');
+  // Simple |x| → abs(x)
+  s=s.replace(/\|([^|]+)\|/g,'abs($1)');
+
+  // nSolve — handle \operatorname{nSolve} that MathQuill may emit
+  s=s.replace(/\\operatorname\{nSolve\}/g,'nSolve');
+  s=s.replace(/\\operatorname\{nsolve\}/g,'nSolve');
+
+  // Named replacements — ORDER MATTERS (specific before general)
+  const reps=[
+    ['\\arcsin','asin'],['\\arccos','acos'],['\\arctan','atan'],
+    ['\\sinh','sinh'],['\\cosh','cosh'],['\\tanh','tanh'],
+    ['\\sin','sin'],['\\cos','cos'],['\\tan','tan'],
+    ['\\ln','log'],
+    ['\\log_{10}','log10'],['\\log_{}','log10'],['\\log','log10'],
+    ['\\exp','exp'],
+    ['\\operatorname{sign}','sign'],
+    ['\\lfloor','floor('],['\\rfloor',')'],
+    ['\\lceil','ceil('],['\\rceil',')'],
+    ['\\pi','pi'],['\\infty','Infinity'],
+    ['\\cdot','*'],['\\times','*'],
+    ['\\alpha','alpha'],['\\beta','beta'],['\\gamma','gamma'],
+    ['\\delta','delta'],['\\theta','theta'],['\\phi','phi'],
+    ['\\lambda','lambda'],['\\mu','mu'],['\\sigma','sigma'],
+    ['\\omega','omega'],['\\tau','tau'],['\\rho','rho'],
+  ];
+  for(const [from,to] of reps) s=s.split(from).join(to);
+
+  // Remaining braces → parens, strip backslashes, strip whitespace
+  s=s.replace(/\{/g,'(').replace(/\}/g,')');
+  s=s.replace(/\\/g,'');
+  s=s.replace(/\s+/g,'');
+  return s;
+}
+
+// ════════════════════════════════════════
+// NUMERICAL SOLVER  (bisection + Newton refinement)
+// ════════════════════════════════════════
+function numericalSolve(lhsExpr, rhsExpr, varName) {
+  let lhsFn, rhsFn;
+  try {
+    const lhsC = math.compile(lhsExpr);
+    const rhsC = math.compile(rhsExpr);
+    lhsFn = v => {
+      const scope = buildScope(v); scope[varName]=v;
+      return lhsC.evaluate(scope) - rhsC.evaluate(scope);
+    };
+  } catch(_) { return {roots:[], error:'Parse error'}; }
+
+  const RANGE=[-1000,1000], STEPS=2000;
+  const dx=(RANGE[1]-RANGE[0])/STEPS;
+  const roots=[];
+
+  // Sweep for sign changes (bisection)
+  for(let i=0;i<STEPS;i++){
+    const a=RANGE[0]+i*dx, b=a+dx;
+    let fa, fb;
+    try{ fa=lhsFn(a); fb=lhsFn(b); } catch(_){ continue; }
+    if(!isFinite(fa)||!isFinite(fb)) continue;
+    if(fa*fb<=0){
+      // Bisect to 50 iterations
+      let lo=a, hi=b;
+      for(let j=0;j<50;j++){
+        const mid=(lo+hi)/2;
+        let fm; try{ fm=lhsFn(mid); } catch(_){ break; }
+        if(!isFinite(fm)) break;
+        if(Math.abs(fm)<1e-12){ lo=hi=mid; break; }
+        if(fa*fm<=0){ hi=mid; fb=fm; } else { lo=mid; fa=fm; }
+      }
+      const root=parseFloat(((lo+hi)/2).toPrecision(8));
+      // Deduplicate
+      if(!roots.some(r=>Math.abs(r-root)<1e-6)) roots.push(root);
+    }
+  }
+  return {roots, error: roots.length===0?'No solution found':null};
+}
+
+// ════════════════════════════════════════
+// FUNCTION MANAGEMENT
+// ════════════════════════════════════════
+function parseFn(fn) {
+  let expr = fn.expr.trim();
+  fn.type = 'function';
+  fn.compiled = null;
+  fn.pointCoords = null;
+  fn.solveResult = null;
+  fn.error = null;
+  fn.is3D = false;
+  fn.analysis = null;
+
+  if(!expr) return;
+
+  // ── Strip "f(x) =" or "g(x,y) =" style definition prefix ──
+  expr = expr.replace(/^[a-zA-Z_][a-zA-Z0-9_]*\([^)]*\)\s*=\s*/, '');
+
+  // ── Detect nSolve(equation, variable) ──
+  const nsolveMatch = expr.match(/^nSolve\((.+),\s*([a-zA-Z])\s*\)$/);
+  if(nsolveMatch){
+    fn.type = 'nsolve';
+    const eqRaw = nsolveMatch[1].trim();
+    const varName = nsolveMatch[2];
+    fn.solveVar = varName;
+    const eqIdx = eqRaw.indexOf('=');
+    if(eqIdx === -1){
+      fn.error = 'Missing = in equation';
+    } else {
+      const lhs = eqRaw.slice(0, eqIdx).trim();
+      const rhs = eqRaw.slice(eqIdx+1).trim();
+      const {roots, error} = numericalSolve(lhs, rhs, varName);
+      if(error && roots.length===0) fn.error = error;
+      fn.solveResult = roots;
+    }
+    return;
+  }
+
+  // ── Detect point (a, b) ──
+  const ptMatch = expr.match(/^\(\s*([^,()]+)\s*,\s*([^,()]+)\s*\)$/);
+  if(ptMatch){
+    try{
+      const px = math.evaluate(ptMatch[1]);
+      const py = math.evaluate(ptMatch[2]);
+      if(typeof px==='number' && typeof py==='number' && isFinite(px) && isFinite(py)){
+        fn.type = 'point';
+        fn.pointCoords = {x:px, y:py};
+        return;
+      }
+    } catch(_){}
+  }
+
+  // ── Detect 3D: standalone y variable (not inside a word like "cyl") ──
+  fn.is3D = /(?<![a-zA-Z0-9_])y(?![a-zA-Z0-9_(])/.test(expr);
+
+  // ── Compile ──
+  try{ fn.compiled = math.compile(expr); fn.error = null; }
+  catch(_){ fn.error = 'Syntax error'; }
+}
+
+function addFunction() {
+  const id=fnIdCounter++;
+  const color=FN_COLORS[functions.length%FN_COLORS.length];
+  functions.push({id, mqLatex:'', expr:'', color, compiled:null, visible:true, error:null, type:'function', pointCoords:null, solveResult:null, solveVar:'x', showAnalysis:false, analysis:null});
   renderSidebar();
-  // Focus new input
-  requestAnimationFrame(() => {
-    const inp = document.getElementById(`fi-${id}`);
-    if (inp) { inp.focus(); activeFnId = id; }
+  requestAnimationFrame(()=>{
+    activeFnId=id;
+    const mf=mathFields[id];
+    if(mf) mf.focus();
+    highlightActive(id);
   });
 }
 
 function removeFunction(id) {
-  functions = functions.filter(f => f.id !== id);
-  if (activeFnId === id) activeFnId = functions.length ? functions[functions.length - 1].id : null;
+  functions=functions.filter(f=>f.id!==id);
+  delete mathFields[id];
+  if(activeFnId===id) activeFnId=functions.length?functions[functions.length-1].id:null;
   renderSidebar(); drawAll();
 }
 
 function toggleVisible(id) {
-  const fn = functions.find(f => f.id === id);
-  if (fn) { fn.visible = !fn.visible; renderSidebar(); drawAll(); }
+  const fn=functions.find(f=>f.id===id);
+  if(fn){ fn.visible=!fn.visible; renderSidebar(); drawAll(); }
 }
 
-function onInput(id, val) {
-  const fn = functions.find(f => f.id === id);
-  if (!fn) return;
-  fn.expr = val;
-  compileFn(fn);
-  updateFnUI(fn);
+function highlightActive(id) {
+  document.querySelectorAll('.fn-item').forEach(el=>el.classList.remove('focused'));
+  document.getElementById(`fitem-${id}`)?.classList.add('focused');
+}
+
+function toggleAnalysis(id) {
+  const fn = functions.find(f=>f.id===id);
+  if(!fn || fn.type!=='function' || !fn.compiled) return;
+  fn.showAnalysis = !fn.showAnalysis;
+  if(fn.showAnalysis && !fn.analysis) fn.analysis = analyseFunction(fn);
+  renderSidebar();
   drawAll();
 }
 
-function updateFnUI(fn) {
-  const previewEl = document.getElementById(`fp-${fn.id}`);
-  const errorEl   = document.getElementById(`fe-${fn.id}`);
-  const itemEl    = document.getElementById(`fitem-${fn.id}`);
-  if (!previewEl) return;
+function analysisChipsHtml(fn) {
+  if(!fn.analysis) return '';
+  const {xIntercepts, yIntercept, vAsymptotes, hAsymptotes} = fn.analysis;
+  const dim = `color:var(--text-dim)`;
+  const val = `color:var(--text-mid);font-weight:700`;
+  let html = '';
 
-  if (fn.latex) {
-    try {
-      katex.render(fn.latex, previewEl, { throwOnError: false, displayMode: false });
-      errorEl.textContent = '';
-    } catch (_) { previewEl.innerHTML = ''; }
+  // y-intercept
+  html += `<div class="fn-analysis-chip">
+    <span class="chip-label">y</span>
+    <span class="chip-val" style="${yIntercept!==null?val:dim}">${yIntercept!==null ? parseFloat(yIntercept.toPrecision(6)) : '—'}</span>
+  </div>`;
+
+  // x-intercepts
+  const xStr = xIntercepts.length
+    ? xIntercepts.map(v=>parseFloat(v.toPrecision(5))).join(', ')
+    : '—';
+  html += `<div class="fn-analysis-chip">
+    <span class="chip-label">x</span>
+    <span class="chip-val" style="${xIntercepts.length?val:dim}">${xStr}</span>
+  </div>`;
+
+  // Asymptotes
+  const asymParts = [
+    ...vAsymptotes.map(v=>`x = ${parseFloat(v.toPrecision(5))}`),
+    ...hAsymptotes.map(h=>`y = ${h.val}`)
+  ];
+  html += `<div class="fn-analysis-chip" style="flex-basis:100%">
+    <span class="chip-label">asymptotes</span>
+    <span class="chip-val" style="${asymParts.length?val:dim}">${asymParts.length ? asymParts.join(',  ') : '—'}</span>
+  </div>`;
+
+  return html;
+}
+
+function updateResultUI(fn) {
+  const resEl = document.getElementById(`fr-${fn.id}`);
+  if(!resEl) return;
+  if(fn.type==='nsolve' && fn.solveResult !== null){
+    if(fn.solveResult.length===0){
+      resEl.innerHTML = `<span class="fn-result-label">result</span><span style="color:var(--text-dim);font-size:11px">No solution found</span>`;
+    } else {
+      const vals = fn.solveResult.map(r => {
+        const s = parseFloat(r.toPrecision(6)).toString();
+        return `<span class="fn-result-val">${fn.solveVar} = ${s}</span>`;
+      }).join('<span style="color:var(--text-dim);margin:0 4px">·</span>');
+      resEl.innerHTML = `<span class="fn-result-label">result&nbsp;</span>${vals}`;
+    }
+    resEl.parentElement.style.display='';
   } else {
-    previewEl.innerHTML = '';
-    errorEl.textContent = fn.error && fn.expr ? fn.error : '';
+    resEl.parentElement.style.display='none';
   }
-  itemEl?.classList.toggle('focused', activeFnId === fn.id);
 }
 
 function renderSidebar() {
-  const list = document.getElementById('functions-list');
-  list.innerHTML = '';
+  const list=document.getElementById('functions-list');
+  list.innerHTML='';
 
-  functions.forEach((fn, idx) => {
-    const item = document.createElement('div');
-    item.className = 'fn-item' + (activeFnId === fn.id ? ' focused' : '');
-    item.id = `fitem-${fn.id}`;
-    item.style.setProperty('--fn-color', fn.color);
+  functions.forEach((fn,idx)=>{
+    const item=document.createElement('div');
+    item.className='fn-item'+(activeFnId===fn.id?' focused':'');
+    item.id=`fitem-${fn.id}`;
+    item.style.setProperty('--fn-color',fn.color);
 
-    item.innerHTML = `
+    // Assign letter by position
+    const letter = String.fromCharCode(65 + idx); // A, B, C…
+    fn.letter = letter;
+
+    // Header label depends on type
+    const fnName = letter.toLowerCase();
+    const labelHtml = fn.type==='point'
+      ? `<span class="fn-label-text" style="font-size:13px;font-weight:700;color:${fn.color}">${letter}</span><span class="fn-label-text" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;flex:0"> · Point</span>`
+      : fn.type==='nsolve'
+        ? `<span class="fn-label-text" style="font-size:13px;font-weight:700;color:${fn.color}">${letter}</span><span class="fn-label-text" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;flex:0"> · nSolve</span>`
+        : fn.is3D
+          ? `<span class="fn-label-text" style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:${fn.color}">${fnName}(x,y) =</span>`
+          : `<span class="fn-label-text" style="font-size:13px;font-weight:700;font-family:'Syne',sans-serif;color:${fn.color}">${fnName}(x) =</span>`;
+
+    const analyzeBtn = fn.type==='function'
+      ? `<button class="fn-analyze-btn ${fn.showAnalysis?'active':''}" onclick="toggleAnalysis(${fn.id})" title="Show analysis">⊕</button>`
+      : '';
+
+    item.innerHTML=`
       <div class="fn-header">
         <div class="fn-swatch" style="background:${fn.color};box-shadow:0 0 6px ${fn.color}"></div>
-        <span class="fn-label-text">f<sub>${idx + 1}</sub>(x) =</span>
-        <button class="fn-vis-btn ${fn.visible ? '' : 'hidden'}"
-          onclick="toggleVisible(${fn.id})" title="${fn.visible ? 'Hide' : 'Show'}"
-          style="color:${fn.visible ? fn.color : 'var(--text-dim)'}">
-          ${fn.visible ? '◉' : '○'}
+        ${labelHtml}
+        ${analyzeBtn}
+        <button class="fn-vis-btn ${fn.visible?'':'hidden'}"
+          onclick="toggleVisible(${fn.id})"
+          style="color:${fn.visible?fn.color:'var(--text-dim)'}">
+          ${fn.visible?'◉':'○'}
         </button>
-        <button class="fn-del-btn" onclick="removeFunction(${fn.id})" title="Remove">✕</button>
+        <button class="fn-del-btn" onclick="removeFunction(${fn.id})">✕</button>
       </div>
-      <div class="fn-input-row">
-        <input
-          type="text" id="fi-${fn.id}" class="fn-input"
-          placeholder="e.g. sin(x)^2 + x/3"
-          value="${fn.expr.replace(/"/g, '&quot;')}"
-          autocomplete="off" spellcheck="false"
-        >
+      <div class="fn-mq-row" id="mq-row-${fn.id}">
+        <div id="mq-${fn.id}" style="width:100%"></div>
       </div>
-      <div class="fn-preview" id="fp-${fn.id}"></div>
-      <div class="fn-error-text" id="fe-${fn.id}"></div>
+      <div class="fn-error-text" id="fe-${fn.id}">${fn.error&&fn.expr?fn.error:''}</div>
+      ${fn.showAnalysis && fn.analysis ? `<div class="fn-analysis">${analysisChipsHtml(fn)}</div>` : ''}
+      <div class="fn-result-wrap" style="display:none">
+        <div class="fn-result" id="fr-${fn.id}"></div>
+      </div>
     `;
-
     list.appendChild(item);
+  });
 
-    // Re-render KaTeX if has latex
-    if (fn.latex) {
-      try {
-        katex.render(fn.latex, item.querySelector(`#fp-${fn.id}`),
-          { throwOnError: false, displayMode: false });
-      } catch(_) {}
-    }
-    if (fn.error && fn.expr) {
-      const errEl = item.querySelector(`#fe-${fn.id}`);
-      if (errEl) errEl.textContent = fn.error;
-    }
+  initMathFields();
 
-    const inp = item.querySelector(`#fi-${fn.id}`);
-    inp.addEventListener('input', e => onInput(fn.id, e.target.value));
-    inp.addEventListener('focus', () => {
-      activeFnId = fn.id;
-      document.querySelectorAll('.fn-item').forEach(el => el.classList.remove('focused'));
-      item.classList.add('focused');
+  // Restore results for already-computed nSolve entries
+  functions.forEach(fn => updateResultUI(fn));
+}
+
+function initMathFields() {
+  functions.forEach(fn=>{
+    const container=document.getElementById(`mq-${fn.id}`);
+    if(!container||container.dataset.mqReady) return;
+    container.dataset.mqReady='1';
+
+    const fnId=fn.id;
+    const mf=MQ.MathField(container,{
+      handlers:{
+        edit(){
+          const f=functions.find(f=>f.id===fnId);
+          if(!f) return;
+          f.mqLatex=mf.latex();
+          f.expr=latexToMathjs(f.mqLatex);
+          parseFn(f);
+          const errEl=document.getElementById(`fe-${fnId}`);
+          if(errEl) errEl.textContent=(f.error&&f.expr)?f.error:'';
+          updateResultUI(f);
+          drawAll();
+        },
+        enter(){ addFunction(); }
+      }
     });
-    inp.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); addFunction(); }
+
+    if(fn.mqLatex) mf.latex(fn.mqLatex);
+    mathFields[fnId]=mf;
+
+
+    // Track active field
+    container.addEventListener('mousedown',()=>{
+      activeFnId=fnId;
+      highlightActive(fnId);
     });
+    document.getElementById(`mq-row-${fnId}`)
+      ?.addEventListener('click',()=>mf.focus());
   });
 }
 
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════
 // KEYBOARD
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════
+// Each key: d=KaTeX label, plain=render as text, cmd/write/typedText=MathQuill action
 const KB_GROUPS = [
   {
-    label: 'Variables',
-    rows: [
+    label:"Solve & Plot",
+    rows:[
       [
-        { d: 'x',  v: 'x'        },
-        { d: 'y',  v: 'y'        },
-        { d: 'π',  v: 'pi'       },
-        { d: 'e',  v: 'e'        },
-        { d: '∞',  v: 'Infinity' },
+        {d:"nSolve", plain:true, write:"nSolve("},
+        {d:"=",      plain:true, write:"="},
+        {d:",x",     plain:true, write:",x)"},
+        {d:",y",     plain:true, write:",y)"},
       ]
     ]
   },
   {
-    label: 'Trigonometry',
-    rows: [
+    label:'3D (use x & y)',
+    rows:[
       [
-        { d: 'sin',    v: 'sin('   },
-        { d: 'cos',    v: 'cos('   },
-        { d: 'tan',    v: 'tan('   },
-      ],
-      [
-        { d: 'arcsin', v: 'asin('  },
-        { d: 'arccos', v: 'acos('  },
-        { d: 'arctan', v: 'atan('  },
-      ],
-      [
-        { d: 'sinh',   v: 'sinh('  },
-        { d: 'cosh',   v: 'cosh('  },
-        { d: 'tanh',   v: 'tanh('  },
+        {d:"sin(xy)",        plain:true, write:"sin(x*y)"},
+        {d:"x²+y²",         plain:true, write:"x^2+y^2"},
+        {d:"e^{-(x²+y²)}",  plain:true, write:"exp(-(x^2+y^2))"},
       ]
     ]
   },
   {
-    label: 'Functions',
-    rows: [
+    label:'Functions',
+    rows:[
+      ['A','B','C','D'].map(l=>({d:l, plain:true, write:`${l}(`})),
+      ['E','F','G','H'].map(l=>({d:l, plain:true, write:`${l}(`})),
+    ]
+  },
+  {
+    label:'Variables',
+    rows:[[
+      {d:'x',          plain:true,  write:'x'         },
+      {d:'y',          plain:true,  write:'y'         },
+      {d:'\\pi',                    write:'\\pi'      },
+      {d:'e',          plain:true,  write:'e'         },
+      {d:'\\infty',                 write:'\\infty'   },
+    ]]
+  },
+  {
+    label:'Trigonometry',
+    rows:[
+      [{d:'\\sin',    write:'\\sin('   },{d:'\\cos',    write:'\\cos('   },{d:'\\tan',    write:'\\tan('   }],
+      [{d:'\\arcsin', write:'\\arcsin('},{d:'\\arccos', write:'\\arccos('},{d:'\\arctan', write:'\\arctan('}],
+      [{d:'\\sinh',   write:'\\sinh('  },{d:'\\cosh',   write:'\\cosh('  },{d:'\\tanh',   write:'\\tanh('  }]
+    ]
+  },
+  {
+    label:'Functions',
+    rows:[
       [
-        { d: '√',    v: 'sqrt('  },
-        { d: '∛',    v: 'cbrt('  },
-        { d: '|x|',  v: 'abs('   },
-      ],
-      [
-        { d: 'ln',   v: 'log('   },
-        { d: 'log₁₀',v: 'log10('},
-        { d: 'exp',  v: 'exp('   },
-      ],
-      [
-        { d: '⌊x⌋',  v: 'floor(' },
-        { d: '⌈x⌉',  v: 'ceil('  },
-        { d: 'sign', v: 'sign('  },
+        {d:'\\sqrt{x}',          cmd:'\\sqrt'                        },
+        {d:'\\sqrt[3]{x}',       plain:true,  write:'cbrt('          },
+        {d:'\\left|x\\right|',   write:'|'                           },
+      ],[
+        {d:'\\ln(x)',            write:'\\ln('                        },
+        {d:'\\log_{10}(x)',      write:'\\log_{10}('                  },
+        {d:'e^{x}',              write:'e^{'                          },
+      ],[
+        {d:'\\lfloor x\\rfloor', write:'floor(',  plain:false         },
+        {d:'\\lceil x\\rceil',   write:'ceil(',   plain:false         },
+        {d:'\\text{sign}(x)',    plain:true,  write:'sign('           },
       ]
     ]
   },
   {
-    label: 'Operators',
-    rows: [
+    label:'Operators',
+    rows:[
       [
-        { d: '^',    v: '^'       },
-        { d: 'x²',   v: '^2'      },
-        { d: 'x³',   v: '^3'      },
-        { d: '!',    v: '!'       },
-      ],
-      [
-        { d: '(',    v: '('       },
-        { d: ')',    v: ')'       },
-        { d: '/',    v: '/'       },
-        { d: '*',    v: '*'       },
+        {d:'x^{n}',              typedText:'^'  },
+        {d:'x^{2}',              write:'^{2}'   },
+        {d:'x^{3}',              write:'^{3}'   },
+        {d:'n!',   plain:true,   write:'!'      },
+      ],[
+        {d:'(',    plain:true,   typedText:'('  },
+        {d:')',    plain:true,   typedText:')'  },
+        {d:'\\dfrac{a}{b}',      cmd:'\\frac'   },
+        {d:'\\times',            write:'\\cdot' },
       ]
     ]
   },
   {
-    label: 'Greek',
-    rows: [
-      [
-        { d: 'α', v: 'alpha'   },
-        { d: 'β', v: 'beta'    },
-        { d: 'γ', v: 'gamma'   },
-        { d: 'δ', v: 'delta'   },
-      ],
-      [
-        { d: 'θ', v: 'theta'   },
-        { d: 'φ', v: 'phi'     },
-        { d: 'λ', v: 'lambda'  },
-        { d: 'μ', v: 'mu'      },
-      ],
-      [
-        { d: 'σ', v: 'sigma'   },
-        { d: 'ω', v: 'omega'   },
-        { d: 'τ', v: 'tau'     },
-        { d: 'ρ', v: 'rho'     },
-      ]
+    label:'Greek',
+    rows:[
+      [{d:'\\alpha',write:'\\alpha'},{d:'\\beta',write:'\\beta'},{d:'\\gamma',write:'\\gamma'},{d:'\\delta',write:'\\delta'}],
+      [{d:'\\theta',write:'\\theta'},{d:'\\phi',write:'\\phi'},{d:'\\lambda',write:'\\lambda'},{d:'\\mu',write:'\\mu'}],
+      [{d:'\\sigma',write:'\\sigma'},{d:'\\omega',write:'\\omega'},{d:'\\tau',write:'\\tau'},{d:'\\rho',write:'\\rho'}]
     ]
   }
 ];
 
-function insertAtCursor(text) {
-  // Ensure there's a function to type into
-  if (functions.length === 0) { addFunction(); return; }
-  if (activeFnId === null) { activeFnId = functions[0].id; }
-
-  const inp = document.getElementById(`fi-${activeFnId}`);
-  if (!inp) return;
-  inp.focus();
-
-  const s = inp.selectionStart ?? inp.value.length;
-  const e = inp.selectionEnd   ?? inp.value.length;
-  inp.value = inp.value.slice(0, s) + text + inp.value.slice(e);
-  inp.setSelectionRange(s + text.length, s + text.length);
-  onInput(activeFnId, inp.value);
+function insertIntoMathField(key) {
+  if(functions.length===0){ addFunction(); return; }
+  if(activeFnId===null) activeFnId=functions[0].id;
+  const mf=mathFields[activeFnId];
+  if(!mf) return;
+  if(key.cmd!==undefined)       mf.cmd(key.cmd);
+  else if(key.write!==undefined) mf.write(key.write);
+  else if(key.typedText!==undefined) mf.typedText(key.typedText);
+  else if(key.keystroke!==undefined) mf.keystroke(key.keystroke);
+  mf.focus();
 }
 
 function renderKeyboard() {
-  const body = document.getElementById('keyboard-body');
-  body.innerHTML = '';
-  KB_GROUPS.forEach(grp => {
-    const g = document.createElement('div');
-    g.className = 'key-group';
-    const lbl = document.createElement('div');
-    lbl.className = 'key-group-label';
-    lbl.textContent = grp.label;
+  const body=document.getElementById('keyboard-body');
+  body.innerHTML='';
+  KB_GROUPS.forEach(grp=>{
+    const g=document.createElement('div'); g.className='key-group';
+    const lbl=document.createElement('div'); lbl.className='key-group-label'; lbl.textContent=grp.label;
     g.appendChild(lbl);
-    grp.rows.forEach(row => {
-      const r = document.createElement('div');
-      r.className = 'key-row';
-      row.forEach(k => {
-        const btn = document.createElement('button');
-        btn.className = 'key-btn';
-        btn.textContent = k.d;
-        btn.title = k.v;
-        btn.addEventListener('mousedown', ev => {
-          ev.preventDefault(); // keep input focused
-          insertAtCursor(k.v);
-        });
+    grp.rows.forEach(row=>{
+      const r=document.createElement('div'); r.className='key-row';
+      row.forEach(k=>{
+        const btn=document.createElement('button'); btn.className='key-btn';
+        if(k.plain){ btn.textContent=k.d; }
+        else { try{ katex.render(k.d,btn,{throwOnError:false,displayMode:false,output:'html'}); } catch(_){ btn.textContent=k.d; } }
+        btn.addEventListener('mousedown',ev=>{ ev.preventDefault(); insertIntoMathField(k); });
         r.appendChild(btn);
       });
       g.appendChild(r);
@@ -900,40 +1191,22 @@ function renderKeyboard() {
   });
 }
 
-// Keyboard toggle
-let kbOpen = true;
-document.getElementById('keyboard-header').addEventListener('click', () => {
-  kbOpen = !kbOpen;
-  const body = document.getElementById('keyboard-body');
-  body.style.display = kbOpen ? 'flex' : 'none';
-  document.getElementById('kh-arrow').textContent = kbOpen ? '▲' : '▼';
-  setTimeout(resizeCanvas, 60);
+let kbOpen=true;
+document.getElementById('keyboard-header').addEventListener('click',()=>{
+  kbOpen=!kbOpen;
+  document.getElementById('keyboard-body').style.display=kbOpen?'flex':'none';
+  document.getElementById('kh-arrow').textContent=kbOpen?'▲':'▼';
+  setTimeout(resizeCanvas,60);
 });
 
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════
-document.getElementById('add-fn-btn').addEventListener('click', () => addFunction());
-document.getElementById('reset-btn').addEventListener('click', () => {
-  view = { xMin: -10, xMax: 10, yMin: -7, yMax: 7 };
-  drawAll();
-});
+// ════════════════════════════════════════
+document.getElementById('add-fn-btn').addEventListener('click', addFunction);
+document.getElementById('reset-btn').addEventListener('click',()=>{ view={xMin:-10,xMax:10,yMin:-7,yMax:7}; drawAll(); });
 
 renderKeyboard();
-
-// Seed with a few functions
-addFunction('sin(x)');
-addFunction('x^2 / 5');
-
-// Force KaTeX re-render after math.js + fonts load
-setTimeout(() => {
-  functions.forEach(fn => {
-    compileFn(fn);
-    updateFnUI(fn);
-  });
-  renderSidebar();
-  resizeCanvas();
-}, 300);
+addFunction();
 </script>
 </body>
 </html>
